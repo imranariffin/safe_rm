@@ -6,11 +6,13 @@ RESTOREFILE="$HOME/.restore.info"
 if [ -e $RECYCLEBIN ]
 then
 	rm $RECYCLEBIN -rf
+	mkdir $RECYCLEBIN
 fi
 
 if [ -e $RESTOREFILE ]
 then
 	rm $RESTOREFILE
+	touch $RESTOREFILE
 fi
 
 

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+RECYCLEBIN="$HOME/.deleted"
+RESTOREFILE="$HOME/.restore.info"
+
+#-----------------------#
+#			FUNCTION DEFS			#
+#-----------------------#
+
+#-----------------------#
+#			ERROR CHECKING		#
+#-----------------------#
+
+if [ $# -lt 1 ]
+then
+	echo "safe_rm_restore: missing operand"
+	echo "Try 'safe_rm_restore --help' for more information."
+	exit 1
+fi
+
+if [[ ! -e $RESTOREFILE ]] || [[ $(cat $RESTOREFILE | wc -l) -eq 0 ]]
+then
+	echo "safe_rm_restore: recyle bin is empty"
+	exit 1
+fi
+
+if ! egrep -q '^'$1':' $RESTOREFILE
+then
+	echo "safe_rm_restore: no such entry '$1' to restore"
+	exit 1
+fi
+
+#-----------------------#
+#			MAIN OPERATIONS		#
+#-----------------------#
+
+file=$1
+entry=$(egrep '^'$file':' $RESTOREFILE)
+fullpath=$(echo $entry | cut -d ":" -f2)
+
+#move file to original path
+#remove entry
+mv $RECYCLEBIN/$file $fullpath
+echo $(egrep -v '^'$file':' $RESTOREFILE) > $RESTOREFILE
+
+exit 0
