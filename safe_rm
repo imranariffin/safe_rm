@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# ----------------------- #
+# 		ERROR CHECKING			#
+# ----------------------- #
+
+if [ $# -ne 1 ] 
+then
+	echo -e "safe_rm: missing operand\nTry 'safe_rm --help' for more information."
+	exit 1
+fi
+if [ ! -e $1 ]
+then
+	echo "safe_rm: cannot remove '$1': No such file or directory"
+	exit 1
+fi
+if [ ! -f $1 ]
+then
+	echo "safe_rm: cannot remove '$1/': Is a directory"
+	exit 1
+fi
+
+selfpath="$HOME/safe_rm/safe_rm"
+filepath="$PWD/$1"
+
+if [ $filepath = $selfpath ]
+then
+	echo "safe_rm: cannot remove itself"
+	exit 1
+fi
+
+# ----------------------- #
+# 		MAIN OPERATIONS			#
+# ----------------------- #
+
+RECYCLEBIN="$HOME/.deleted"
+RESTOREFILE="$HOME/.restore.info"
+
+#create recyclebin and restorefile if not exist
+if [ ! -e $RECYCLEBIN ]
+then
+	mkdir $RECYCLEBIN
+fi
+if [ ! -e $RESTOREFILE ]
+then
+	touch $RESTOREFILE
+fi
+
+#get full path of file
+#get inode of file
+#rename
+file=$1
+fullpath=$(echo "$(cd "$(dirname "$file")"; pwd)/$(basename "$file")")
+inode="$(stat -c %i $fullpath)"
+newname=${file}_${inode}
+
+#move
+#write entry
+mv $fullpath $RECYCLEBIN/$newname
+echo "${newname}:$fullpath" >> $RESTOREFILE
+
+exit 0

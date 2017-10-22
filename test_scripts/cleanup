@@ -1,0 +1,16 @@
+#!/bin/bash
+
+RECYCLEBIN="$HOME/.deleted"
+RESTOREFILE="$HOME/.restore.info"
+
+if [ -e $RECYCLEBIN ]
+then
+	rm $RECYCLEBIN -rf
+fi
+
+if [ -e $RESTOREFILE ]
+then
+	rm $RESTOREFILE
+fi
+
+
