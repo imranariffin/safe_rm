@@ -74,6 +74,20 @@ function setup() {
 
 #@test "Should delete two files"
 
+@test "should safe delete files with wildcard" {
+	setup
+	run touch file{1..5}
+	[ $(ls file* 2> /dev/null | wc -l) -eq 5 ]
+	[ $(ls $RECYCLEBIN/file*_ 2> /dev/null | wc -l) -eq 0 ]
+	[ $(egrep '^file[0-9]_[0-9]*:' $RESTOREFILE | wc -l) -eq 0 ]
+	run bash $safe_rm file*
+
+	[ "$status" -eq 0 ]
+	[ $(ls file* 2> /dev/null | wc -l) -eq 0 ]
+	[ $(ls $RECYCLEBIN/file* 2> /dev/null | wc -l) -eq 5 ]
+	[ $(egrep '^file[0-9]_[0-9]*:' $RESTOREFILE | wc -l) -eq 5 ]
+}
+
 @test "Not a test, just cleaninup" {
 	run bash $cleanup
 }
