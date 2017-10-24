@@ -6,3 +6,9 @@ touch dir/file1
 touch dir/dir1/file2
 touch dir/dir1/dir2/file3
 touch dir/dir1/dir2/file4
+mkdir dir/dir3
+mkdir dir/dir3/dir4
+mkdir dir/dir3/dir5
+touch dir/dir3/file5
+touch dir/dir3/file6
+touch dir/dir3/dir4/file7
