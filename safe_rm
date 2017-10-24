@@ -5,6 +5,27 @@
 # ----------------------- #
 
 function remove() {
+	if [ ! -e $1 ]
+	then
+		echo "safe_rm: cannot remove '$1': No such file or directory"
+		exit 1
+	fi
+	if [ ! -f $1 ]
+	then
+		echo "safe_rm: cannot remove '$1/': Is a directory"
+		exit 1
+	fi
+
+	selfpath="$HOME/safe_rm/safe_rm"
+	file=$1
+	fullpath=$(echo "$(cd "$(dirname "$file")"; pwd)/$(basename $file)")
+
+	if [ $fullpath = $selfpath ]
+	then
+		echo "safe_rm: cannot remove itself"
+		exit 1
+	fi
+
 	#get full path of file
 	#get inode of file
 	#rename
@@ -20,6 +41,22 @@ function remove() {
 	echo "${newname}:$fullpath" >> $RESTOREFILE
 }
 
+function rm_recurse() {
+	if [ -f $1 ]
+	then
+		remove $1
+		return
+	fi
+
+	local d=$1
+	local files=$(ls $d)
+	for f in $files
+	do
+		rm_recurse $d/$f
+	done
+	rmdir $d
+}
+
 # ----------------------- #
 # 		ERROR CHECKING			#
 # ----------------------- #
@@ -27,26 +64,6 @@ function remove() {
 if [ $# -lt 1 ] 
 then
 	echo -e "safe_rm: missing operand\nTry 'safe_rm --help' for more information."
-	exit 1
-fi
-if [ ! -e $1 ]
-then
-	echo "safe_rm: cannot remove '$1': No such file or directory"
-	exit 1
-fi
-if [ ! -f $1 ]
-then
-	echo "safe_rm: cannot remove '$1/': Is a directory"
-	exit 1
-fi
-
-selfpath="$HOME/safe_rm/safe_rm"
-file=$1
-fullpath=$(echo "$(cd "$(dirname "$file")"; pwd)/$(basename $file)")
-
-if [ $fullpath = $selfpath ]
-then
-	echo "safe_rm: cannot remove itself"
 	exit 1
 fi
 
@@ -67,11 +84,37 @@ then
 	touch $RESTOREFILE
 fi
 
-files=$@
+recursive=false
 
-for f in $files
+#manage options
+while getopts ":ivr" opt
 do
-	remove $f
+	case $opt in
+		i) 	echo "safe_rm: option -i not implemented yet"; exit 1 ;;
+		v) 	echo "safe_rm: option -v not implemented yet"; exit 1 ;;
+		r) 	recursive=true ;;
+		*) 	echo "safe_rm: invalid option -- $opt"; 
+				echo "Try 'safe_rm --help' for more information.";
+				exit 1 ;;
+	esac
 done
+
+shift $((OPTIND-1))
+
+if [ $recursive = true ]
+then
+	for f in $@
+	do	
+		rm_recurse $f
+	done
+	exit 0
+else
+	files=$@
+
+	for f in $files
+	do
+		remove $f
+	done
+fi
 
 exit 0
