@@ -4,6 +4,7 @@ RECYCLEBIN="$HOME/.deleted"
 RESTOREFILE="$HOME/.restore.info"
 safe_rm="$HOME/safe_rm/safe_rm"
 cleanup="$HOME/safe_rm/test_scripts/cleanup"
+create_dirs="$HOME/safe_rm/test_scripts/create_dirs"
 
 function setup() {
 	cd $HOME/safe_rm/tests
@@ -88,6 +89,17 @@ function setup() {
 	[ $(egrep '^file[0-9]_[0-9]*:' $RESTOREFILE | wc -l) -eq 5 ]
 }
 
+@test "Should be able to safe delete a folder recursively when given option '-r'" {
+	setup
+	run bash $create_dirs
+	n=$(find dir 2> /dev/null | wc -l)
+
+	run bash $safe_rm -r dir
+
+	[ $(find dir 2> /dev/null | wc -l) -ne $n ]
+}
+
 @test "Not a test, just cleaninup" {
 	run bash $cleanup
+	run rm -rf dir
 }
