@@ -58,16 +58,6 @@ function rm_recurse() {
 }
 
 # ----------------------- #
-# 		ERROR CHECKING			#
-# ----------------------- #
-
-if [ $# -lt 1 ] 
-then
-	echo -e "safe_rm: missing operand\nTry 'safe_rm --help' for more information."
-	exit 1
-fi
-
-# ----------------------- #
 # 		MAIN OPERATIONS			#
 # ----------------------- #
 
@@ -100,6 +90,13 @@ do
 done
 
 shift $((OPTIND-1))
+
+#error checking
+if [ $# -lt 1 ] 
+then
+	echo -e "safe_rm: missing operand\nTry 'safe_rm --help' for more information."
+	exit 1
+fi
 
 if [ $recursive = true ]
 then
